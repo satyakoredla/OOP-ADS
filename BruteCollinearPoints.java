@@ -25,7 +25,6 @@ public class BruteCollinearPoints {
                 throw new IllegalArgumentException("Repeated points found.");
             }
         }
-
         LineSegment[] tempSegments = new LineSegment[2];
         int n = ptsCopy.length;
 

@@ -30,18 +30,45 @@ public class BruteCollinearPoints {
 
         // Examine 4 points at a time
         for (int i = 0; i < n - 3; i++) {
-            for (int j = i + 1; j < n - 2; j++) {
-                for (int k = j + 1; k < n - 1; k++) {
-                    for (int m = k + 1; m < n; m++) {
-                        Point p = ptsCopy[i];
+            for (int m = n - 1; m >= i + 3; m--) {
+                Point p = ptsCopy[i];
+                Point s = ptsCopy[m];
+                double slopePS = p.slopeTo(s);
+                
+                boolean foundCollinear = false;
+                for (int j = i + 1; j < m - 1; j++) {
+                    if (foundCollinear) break;
+                    for (int k = j + 1; k < m; k++) {
                         Point q = ptsCopy[j];
                         Point r = ptsCopy[k];
-                        Point s = ptsCopy[m];
 
                         // To check if they are collinear, compare the slopes
-                        if (Double.compare(p.slopeTo(q), p.slopeTo(r)) == 0 &&
-                            Double.compare(p.slopeTo(q), p.slopeTo(s)) == 0) {
+                        if (Double.compare(slopePS, p.slopeTo(q)) == 0 &&
+                            Double.compare(slopePS, p.slopeTo(r)) == 0) {
                             
+                            foundCollinear = true;
+
+                            // Check if this is the longest segment (p is start, s is end)
+                            // 1. Is there any point in the array BEFORE p that is collinear?
+                            boolean hasBefore = false;
+                            for (int x = 0; x < i; x++) {
+                                if (Double.compare(ptsCopy[x].slopeTo(p), slopePS) == 0) {
+                                    hasBefore = true;
+                                    break;
+                                }
+                            }
+                            if (hasBefore) break;
+
+                            // 2. Is there any point in the array AFTER s that is collinear?
+                            boolean hasAfter = false;
+                            for (int x = m + 1; x < n; x++) {
+                                if (Double.compare(p.slopeTo(ptsCopy[x]), slopePS) == 0) {
+                                    hasAfter = true;
+                                    break;
+                                }
+                            }
+                            if (hasAfter) break;
+
                             if (size == tempSegments.length) {
                                 LineSegment[] resized = new LineSegment[tempSegments.length * 2];
                                 for (int x = 0; x < size; x++) {
@@ -50,6 +77,7 @@ public class BruteCollinearPoints {
                                 tempSegments = resized;
                             }
                             tempSegments[size++] = new LineSegment(p, s);
+                            break;
                         }
                     }
                 }

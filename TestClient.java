@@ -28,10 +28,21 @@ public class TestClient {
         }
         StdDraw.show();
 
-        // print and draw the line segments
-        StdOut.println("--- FastCollinearPoints ---");
-        FastCollinearPoints collinear = new FastCollinearPoints(points);
-        for (LineSegment segment : collinear.segments()) {
+        // print and draw the brute force line segments
+        BruteCollinearPoints brute = new BruteCollinearPoints(points);
+        StdOut.println("Brute Collinear Points (" + brute.numberOfSegments() + "):");
+        for (LineSegment segment : brute.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
+
+        StdOut.println();
+
+        // print and draw the fast collinear line segments
+        FastCollinearPoints fast = new FastCollinearPoints(points);
+        StdOut.println("Fast Collinear Points (" + fast.numberOfSegments() + "):");
+        for (LineSegment segment : fast.segments()) {
             StdOut.println(segment);
             segment.draw();
         }

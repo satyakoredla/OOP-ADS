@@ -4,6 +4,8 @@ public class BruteCollinearPoints {
     private LineSegment[] segments;
     private int size = 0;
 
+    // Finds all line segments containing 4 points.
+    // Time complexity: O(n^4) — four nested loops over C(n,4) combinations.
     public BruteCollinearPoints(Point[] points) {
         if (points == null) {
             throw new IllegalArgumentException("Argument 'points' cannot be null.");
@@ -15,60 +17,35 @@ public class BruteCollinearPoints {
             }
         }
 
-        // Clone to avoid mutating the original array passed
+        // Clone to avoid mutating the original array
         Point[] ptsCopy = points.clone();
-        Arrays.sort(ptsCopy);
+        Arrays.sort(ptsCopy); // sort by natural order (y, then x)
 
-        // Check for duplicated points
+        // Check for duplicate points
         for (int i = 0; i < ptsCopy.length - 1; i++) {
             if (ptsCopy[i].compareTo(ptsCopy[i + 1]) == 0) {
                 throw new IllegalArgumentException("Repeated points found.");
             }
         }
-        LineSegment[] tempSegments = new LineSegment[2];
+
         int n = ptsCopy.length;
+        LineSegment[] tempSegments = new LineSegment[2];
 
-        // Examine 4 points at a time
+        // Examine every combination of 4 points: C(n,4) — exactly 4 nested loops → O(n^4)
+        // Because ptsCopy is sorted, ptsCopy[i] < ptsCopy[j] < ptsCopy[k] < ptsCopy[l].
+        // ptsCopy[i] is always the minimum endpoint, so no extra scan is needed to
+        // avoid duplicates — each maximal segment is discovered exactly once.
         for (int i = 0; i < n - 3; i++) {
-            for (int m = n - 1; m >= i + 3; m--) {
-                Point p = ptsCopy[i];
-                Point s = ptsCopy[m];
-                double slopePS = p.slopeTo(s);
-                
-                boolean foundCollinear = false;
-                for (int j = i + 1; j < m - 1; j++) {
-                    if (foundCollinear) break;
-                    for (int k = j + 1; k < m; k++) {
-                        Point q = ptsCopy[j];
-                        Point r = ptsCopy[k];
-
-                        // To check if they are collinear, compare the slopes
-                        if (Double.compare(slopePS, p.slopeTo(q)) == 0 &&
-                            Double.compare(slopePS, p.slopeTo(r)) == 0) {
-                            
-                            foundCollinear = true;
-
-                            // Check if this is the longest segment (p is start, s is end)
-                            // 1. Is there any point in the array BEFORE p that is collinear?
-                            boolean hasBefore = false;
-                            for (int x = 0; x < i; x++) {
-                                if (Double.compare(ptsCopy[x].slopeTo(p), slopePS) == 0) {
-                                    hasBefore = true;
-                                    break;
-                                }
-                            }
-                            if (hasBefore) break;
-
-                            // 2. Is there any point in the array AFTER s that is collinear?
-                            boolean hasAfter = false;
-                            for (int x = m + 1; x < n; x++) {
-                                if (Double.compare(p.slopeTo(ptsCopy[x]), slopePS) == 0) {
-                                    hasAfter = true;
-                                    break;
-                                }
-                            }
-                            if (hasAfter) break;
-
+            for (int j = i + 1; j < n - 2; j++) {
+                double slopeIJ = ptsCopy[i].slopeTo(ptsCopy[j]);
+                for (int k = j + 1; k < n - 1; k++) {
+                    // Prune early: if i-j-k are not collinear, no need to check l
+                    if (Double.compare(slopeIJ, ptsCopy[i].slopeTo(ptsCopy[k])) != 0) continue;
+                    for (int l = k + 1; l < n; l++) {
+                        // All four points are collinear if the third slope also matches
+                        if (Double.compare(slopeIJ, ptsCopy[i].slopeTo(ptsCopy[l])) == 0) {
+                            // ptsCopy[i] is the minimum (array is sorted) and
+                            // ptsCopy[l] is the maximum — this is the maximal segment.
                             if (size == tempSegments.length) {
                                 LineSegment[] resized = new LineSegment[tempSegments.length * 2];
                                 for (int x = 0; x < size; x++) {
@@ -76,8 +53,7 @@ public class BruteCollinearPoints {
                                 }
                                 tempSegments = resized;
                             }
-                            tempSegments[size++] = new LineSegment(p, s);
-                            break;
+                            tempSegments[size++] = new LineSegment(ptsCopy[i], ptsCopy[l]);
                         }
                     }
                 }
@@ -94,6 +70,7 @@ public class BruteCollinearPoints {
         return size;
     }
 
+    // Returns a defensive copy so the internal array cannot be mutated externally.
     public LineSegment[] segments() {
         return segments.clone();
     }

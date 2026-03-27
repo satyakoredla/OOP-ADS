@@ -21,8 +21,8 @@ public class TestClient {
 
         // draw the points
         StdDraw.enableDoubleBuffering();
-        StdDraw.setXscale(0, 32768);
-        StdDraw.setYscale(0, 32768);
+        StdDraw.setXscale(0, 10000);
+        StdDraw.setYscale(0, 10000);
         for (Point p : points) {
             p.draw();
         }
